@@ -34,8 +34,16 @@ def newton_raphson(G, derivada_G, z0: float, tolerancia: float = 1e-12, max_iter
     iteraciones, lanza ``ArithmeticError``: nunca devuelve en silencio un valor
     que no convergió.
     """
-
-    raise NotImplementedError("completar Newton–Raphson")
+    # parece que funciona
+    
+    z=z0
+    for i in range(max_iter):
+        zp = z - G(z)/derivada_G(z)
+        if np.abs(G(zp)) < tolerancia:
+            return zp
+        z=zp
+        
+    raise ArithmeticError()
 
 
 def integrar_euler_explicito(
@@ -54,9 +62,15 @@ def integrar_euler_explicito(
     Devuelve un arreglo de tiempos y otro de estados. Ambos incluyen la
     condición inicial, por lo que tienen ``pasos + 1`` elementos.
     """
-
-    raise NotImplementedError("completar Euler explícito")
-
+    t, x, v = np.zeros(pasos+1), np.zeros(pasos+1), np.zeros(pasos+1)
+    x[0], v[0] = estado_inicial
+    
+    for i in range(pasos):
+        t[i+1] = t[i] + dt
+        x[i+1] = x[i] + dt * v[i]
+        v[i+1] = v[i] + dt * aceleracion(x[i])
+        
+    return np.array(t), np.column_stack((x, v))
 
 def integrar_euler_implicito(
     estado_inicial: np.ndarray,
@@ -82,8 +96,21 @@ def integrar_euler_implicito(
 
     Devuelve tiempos y estados, con ``pasos + 1`` elementos cada uno.
     """
-
-    raise NotImplementedError("completar Euler implícito")
+    t, x, v = np.zeros(pasos+1), np.zeros(pasos+1), np.zeros(pasos+1)
+    x[0], v[0] = estado_inicial
+    
+    for i in range(pasos):
+        def G(z):
+            return z - x[i] - dt * v[i] - dt**2 * aceleracion(z)
+        
+        def derivada_G(z):
+            return 1 + dt**2 * derivada_aceleracion(z)
+        
+        t[i+1] = t[i] + dt
+        x[i+1] = newton_raphson(G, derivada_G, x[i])
+        v[i+1] = v[i] + dt * aceleracion(x[i+1])
+        
+    return np.array(t), np.column_stack((x, v))
 
 
 def solucion_exacta(tiempos: np.ndarray, estado_inicial: np.ndarray) -> np.ndarray:
@@ -97,7 +124,7 @@ def solucion_exacta(tiempos: np.ndarray, estado_inicial: np.ndarray) -> np.ndarr
             -x0 * np.sin(t) + v0 * np.cos(t),
         )
     )
-
+    
 
 def energia(estados: np.ndarray) -> np.ndarray:
     """Energía del resorte por unidad de masa, ``(v² + x²) / 2``.
