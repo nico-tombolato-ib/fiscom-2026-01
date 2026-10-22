@@ -4,4 +4,4 @@ Si usaron IA, agreguen una fila por tarea. Si no la usaron, indíquenlo.
 
 | Tarea delegada | Herramienta | Respuesta usada | Cómo se verificó |
 |---|---|---|---|
-| Explicar el punto 2 y 5 de `question.md`| | | |
+| Explicar el punto 2 y 5 de `question.md`| Gemini Plus | Leí la respuesta | Cálculo a mano |
